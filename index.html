@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Botanix | AI Disease Diagnostics</title>
+    <title>Botanix | AI Plant Diagnostics</title>
     <link rel="stylesheet" href="style.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <header class="navbar">
         <div class="container">
             <div class="logo">
-                <a href="index.html">
-                    <img src="image_1.png" alt="Botanix Logo" class="brand-logo">
-                </a>
+                <a href="index.html"><img src="image_1.png" alt="Botanix Logo" class="brand-logo"></a>
             </div>
             <nav class="nav-links">
                 <a href="index.html" class="active">Home</a>
@@ -28,14 +24,22 @@
 
     <main class="content-spacer">
         <div class="container ai-container">
-            
             <div class="ai-card">
                 <h2 class="ai-title">Botanix AI Diagnostics</h2>
-                <p class="ai-description">Aim the camera at the plant and click "Analyze" to identify the issue.</p>
+                <p class="ai-description">Scan a plant via camera or upload a photo for instant disease detection.</p>
                 
-                <button type="button" id="start-btn" class="btn-primary" onclick="init()">Start Camera</button>
+                <div id="initial-controls">
+                    <button type="button" id="start-btn" class="btn-primary" onclick="init()">
+                        <i class="fas fa-camera"></i> Start Live Camera
+                    </button>
+                    <div class="divider"><span>OR</span></div>
+                    <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+                    <button type="button" class="btn-upload" onclick="document.getElementById('file-upload').click()">
+                        <i class="fas fa-file-upload"></i> Upload Photo
+                    </button>
+                </div>
                 
-                <div id="webcam-container" class="webcam-box"></div>
+                <div id="webcam-container" class="webcam-box" style="display:none;"></div>
 
                 <div id="capture-container" class="webcam-box" style="display:none;">
                     <canvas id="captured-photo"></canvas>
@@ -43,12 +47,11 @@
 
                 <div class="button-group">
                     <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
-                    <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">Take Another Photo</button>
+                    <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">New Scan</button>
                 </div>
 
                 <div id="diagnosis-result"></div>
             </div>
-
         </div>
     </main>
 
@@ -56,30 +59,20 @@
         <div class="container">
             <div class="footer-top">
                 <div class="footer-left">
-                    <a href="index.html">
-                        <img src="image_1.png" alt="Botanix Logo" class="footer-brand-logo">
-                    </a>
+                    <img src="image_1.png" alt="Botanix Logo" class="footer-brand-logo">
                 </div>
-                
                 <div class="footer-center">
-                    <p>Botanix AI Project</p>
-                    <p>Faculty of Computing, SLIIT, Malabe</p>
-                    <p>botanix.site@gmail.com</p>
-                    <p>+94 11 234 5678</p>
+                    <p>Botanix AI Lab<br>Independence Square, Colombo 07<br>contact@botanix.lk</p>
                 </div>
-
                 <div class="footer-right">
                     <a href="#" class="social-icon fb"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-icon ig"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-icon yt"><i class="fab fa-youtube"></i></a>
                     <a href="#" class="social-icon x"><i class="fa-brands fa-x-twitter"></i></a>
-                    <a href="#" class="social-icon in"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="social-icon tt"><i class="fab fa-tiktok"></i></a>
                 </div>
             </div>
-
             <div class="footer-bottom">
-                <p>&copy; 2026 Botanix AI. Pioneering agricultural diagnostics and food security in Sri Lanka.</p>
+                <p>&copy; 2026 Botanix AI. Pioneering agricultural diagnostics in Sri Lanka.</p>
             </div>
         </div>
     </footer>
@@ -90,84 +83,115 @@
     <script type="text/javascript">
         const URL = "./my_model/";
         let model, webcam, maxPredictions;
-        let isStatic = false; // Tracks if we are showing a photo or live feed
+        let isStatic = false;
 
+        // 1. Initialize Model and Camera
         async function init() {
-            const startBtn = document.getElementById("start-btn");
-            startBtn.innerText = "Loading Model...";
+            document.getElementById("start-btn").innerText = "Loading AI...";
+            if(!model) await loadModel();
             
-            model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-            maxPredictions = model.getTotalClasses();
-
-            webcam = new tmImage.Webcam(250, 250, true); 
-            await webcam.setup(); 
+            webcam = new tmImage.Webcam(250, 250, true);
+            await webcam.setup();
             await webcam.play();
-            
             window.requestAnimationFrame(loop);
 
             document.getElementById("webcam-container").appendChild(webcam.canvas);
-            
-            startBtn.style.display = "none";
+            document.getElementById("webcam-container").style.display = "block";
+            document.getElementById("initial-controls").style.display = "none";
             document.getElementById("capture-btn").style.display = "block";
         }
 
+        async function loadModel() {
+            model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+            maxPredictions = model.getTotalClasses();
+        }
+
         async function loop() {
-            if (!isStatic) {
+            if (!isStatic && webcam) {
                 webcam.update();
             }
             window.requestAnimationFrame(loop);
         }
 
+        // 2. Capture and Freeze Function
         async function captureAndPredict() {
-            isStatic = true; // Stop the live update in loop()
-
-            // 1. Capture the current webcam frame to our static canvas
+            isStatic = true;
             const liveCanvas = webcam.canvas;
             const staticCanvas = document.getElementById("captured-photo");
-            const context = staticCanvas.getContext("2d");
+            const ctx = staticCanvas.getContext("2d");
             
             staticCanvas.width = liveCanvas.width;
             staticCanvas.height = liveCanvas.height;
-            context.drawImage(liveCanvas, 0, 0);
+            ctx.drawImage(liveCanvas, 0, 0);
 
-            // 2. Switch UI displays
             document.getElementById("webcam-container").style.display = "none";
             document.getElementById("capture-container").style.display = "block";
             document.getElementById("capture-btn").style.display = "none";
             document.getElementById("retake-btn").style.display = "block";
 
-            // 3. Run AI Prediction on the static frame
+            runDiagnosis(staticCanvas);
+        }
+
+        // 3. File Upload Function
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if(!model) await loadModel();
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    isStatic = true;
+                    const staticCanvas = document.getElementById("captured-photo");
+                    const ctx = staticCanvas.getContext("2d");
+                    staticCanvas.width = 250;
+                    staticCanvas.height = 250;
+                    ctx.drawImage(img, 0, 0, 250, 250);
+
+                    document.getElementById("initial-controls").style.display = "none";
+                    document.getElementById("capture-container").style.display = "block";
+                    document.getElementById("retake-btn").style.display = "block";
+                    runDiagnosis(staticCanvas);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 4. Shared AI Logic
+        async function runDiagnosis(source) {
             const resultDiv = document.getElementById("diagnosis-result");
-            resultDiv.innerHTML = "Analyzing captured photo...";
-
-            const prediction = await model.predict(staticCanvas);
+            resultDiv.innerHTML = "Analyzing...";
+            const prediction = await model.predict(source);
             
-            let highestProb = 0;
-            let bestMatch = "";
-
-            for (let i = 0; i < maxPredictions; i++) {
-                if (prediction[i].probability > highestProb) {
-                    highestProb = prediction[i].probability;
-                    bestMatch = prediction[i].className;
+            let topClass = "";
+            let topProb = 0;
+            prediction.forEach(p => {
+                if(p.probability > topProb) {
+                    topProb = p.probability;
+                    topClass = p.className;
                 }
-            }
+            });
 
-            const confidence = (highestProb * 100).toFixed(0);
             resultDiv.innerHTML = `
                 <div class="diagnosis-card">
-                    <h3>Result: ${bestMatch}</h3>
-                    <p>Accuracy: ${confidence}%</p>
+                    <h3>Result: ${topClass}</h3>
+                    <p>Confidence Score: ${(topProb * 100).toFixed(0)}%</p>
                 </div>
             `;
         }
 
         function resetScanner() {
-            isStatic = false; // Resume live loop
-            
-            // UI Switch back
-            document.getElementById("webcam-container").style.display = "block";
+            isStatic = false;
+            if (webcam) {
+                document.getElementById("webcam-container").style.display = "block";
+                document.getElementById("capture-btn").style.display = "block";
+            } else {
+                document.getElementById("initial-controls").style.display = "block";
+            }
             document.getElementById("capture-container").style.display = "none";
-            document.getElementById("capture-btn").style.display = "block";
             document.getElementById("retake-btn").style.display = "none";
             document.getElementById("diagnosis-result").innerHTML = "";
         }
