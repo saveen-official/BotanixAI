@@ -47,6 +47,9 @@
 
                 <div class="button-group">
                     <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
+    
+                    <button type="button" id="switch-upload-btn" class="btn-upload" onclick="switchToUpload()" style="display:none; margin-top:10px;">Switch to Upload</button>
+    
                     <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">New Scan</button>
                 </div>
 
@@ -99,6 +102,7 @@
             document.getElementById("webcam-container").style.display = "block";
             document.getElementById("initial-controls").style.display = "none";
             document.getElementById("capture-btn").style.display = "block";
+            document.getElementById("switch-upload-btn").style.display = "block";
         }
 
         async function loadModel() {
@@ -194,6 +198,23 @@
             document.getElementById("capture-container").style.display = "none";
             document.getElementById("retake-btn").style.display = "none";
             document.getElementById("diagnosis-result").innerHTML = "";
+        }
+
+        function switchToUpload() {
+    // 1. Stop the webcam if it's running
+    if (webcam) {
+        webcam.stop();
+    }
+    
+    // 2. Hide camera and action buttons
+    document.getElementById("webcam-container").style.display = "none";
+    document.getElementById("capture-btn").style.display = "none";
+    document.getElementById("switch-upload-btn").style.display = "none";
+    
+    // 3. Bring back the original upload options
+    document.getElementById("initial-controls").style.display = "block";
+    document.getElementById("start-btn").innerText = "Start Live Camera";
+    document.getElementById("start-btn").disabled = false;
         }
     </script>
 </body>
