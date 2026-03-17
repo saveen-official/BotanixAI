@@ -303,3 +303,21 @@ body {
     font-size: 14px;
     opacity: 0.7;
 }
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#captured-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+}
+
+/* Ensure the retake button is a different color to distinguish from capture */
+#retake-btn {
+    background-color: var(--primary-color);
+    width: 100%;
+}

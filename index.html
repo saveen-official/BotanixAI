@@ -28,18 +28,27 @@
 
     <main class="content-spacer">
         <div class="container ai-container">
+            
             <div class="ai-card">
                 <h2 class="ai-title">Botanix AI Diagnostics</h2>
                 <p class="ai-description">Aim the camera at the plant and click "Analyze" to identify the issue.</p>
-            
+                
                 <button type="button" id="start-btn" class="btn-primary" onclick="init()">Start Camera</button>
-            
+                
                 <div id="webcam-container" class="webcam-box"></div>
-            
-                <button type="button" id="capture-btn" class="btn-secondary" onclick="predict()" style="display:none;">Analyze Image</button>
-            
-                <div id="diagnosis-result" class="result-display"></div>
+
+                <div id="capture-container" class="webcam-box" style="display:none;">
+                    <canvas id="captured-photo"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
+                    <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">Take Another Photo</button>
+                </div>
+
+                <div id="diagnosis-result"></div>
             </div>
+
         </div>
     </main>
 
@@ -80,50 +89,59 @@
     
     <script type="text/javascript">
         const URL = "./my_model/";
-        let model, webcam, labelContainer, maxPredictions;
+        let model, webcam, maxPredictions;
+        let isStatic = false; // Tracks if we are showing a photo or live feed
 
         async function init() {
-            // UI Feedback: Disable start button
             const startBtn = document.getElementById("start-btn");
             startBtn.innerText = "Loading Model...";
-            startBtn.disabled = true;
-
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
-
-            model = await tmImage.load(modelURL, metadataURL);
+            
+            model = await tmImage.load(URL + "model.json", URL + "metadata.json");
             maxPredictions = model.getTotalClasses();
 
-            const flip = true; 
-            webcam = new tmImage.Webcam(250, 250, flip); 
+            webcam = new tmImage.Webcam(250, 250, true); 
             await webcam.setup(); 
             await webcam.play();
             
-            // Start the visual loop (shows the camera feed)
             window.requestAnimationFrame(loop);
 
-            // Add the camera to the page
             document.getElementById("webcam-container").appendChild(webcam.canvas);
             
-            // UI Changes: Hide Start Button, Show the Analyze Button
             startBtn.style.display = "none";
             document.getElementById("capture-btn").style.display = "block";
         }
 
         async function loop() {
-            webcam.update(); // Only updates the camera view
+            if (!isStatic) {
+                webcam.update();
+            }
             window.requestAnimationFrame(loop);
-            // NOTE: We removed "await predict()" from here!
         }
 
-        // This function now only runs ONCE when you click the button
-        async function predict() {
-            const resultDiv = document.getElementById("diagnosis-result");
-            resultDiv.innerHTML = "Scanning image...";
+        async function captureAndPredict() {
+            isStatic = true; // Stop the live update in loop()
 
-            const prediction = await model.predict(webcam.canvas);
+            // 1. Capture the current webcam frame to our static canvas
+            const liveCanvas = webcam.canvas;
+            const staticCanvas = document.getElementById("captured-photo");
+            const context = staticCanvas.getContext("2d");
             
-            // Logic to find the result with the highest percentage
+            staticCanvas.width = liveCanvas.width;
+            staticCanvas.height = liveCanvas.height;
+            context.drawImage(liveCanvas, 0, 0);
+
+            // 2. Switch UI displays
+            document.getElementById("webcam-container").style.display = "none";
+            document.getElementById("capture-container").style.display = "block";
+            document.getElementById("capture-btn").style.display = "none";
+            document.getElementById("retake-btn").style.display = "block";
+
+            // 3. Run AI Prediction on the static frame
+            const resultDiv = document.getElementById("diagnosis-result");
+            resultDiv.innerHTML = "Analyzing captured photo...";
+
+            const prediction = await model.predict(staticCanvas);
+            
             let highestProb = 0;
             let bestMatch = "";
 
@@ -134,7 +152,6 @@
                 }
             }
 
-            // Display the final result
             const confidence = (highestProb * 100).toFixed(0);
             resultDiv.innerHTML = `
                 <div class="diagnosis-card">
@@ -142,6 +159,17 @@
                     <p>Accuracy: ${confidence}%</p>
                 </div>
             `;
+        }
+
+        function resetScanner() {
+            isStatic = false; // Resume live loop
+            
+            // UI Switch back
+            document.getElementById("webcam-container").style.display = "block";
+            document.getElementById("capture-container").style.display = "none";
+            document.getElementById("capture-btn").style.display = "block";
+            document.getElementById("retake-btn").style.display = "none";
+            document.getElementById("diagnosis-result").innerHTML = "";
         }
     </script>
 </body>
