@@ -174,3 +174,96 @@ body {
         text-align: center;
     }
 }
+/* -------------------------
+   AI MODEL SECTION STYLES
+------------------------- */
+.ai-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.ai-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(11, 45, 38, 0.08); /* Soft shadow */
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+}
+
+.ai-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.ai-description {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-bottom: 30px;
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: var(--font-main);
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #061f1a;
+}
+
+.btn-primary:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
+
+/* Webcam Canvas Box */
+.webcam-box {
+    margin: 0 auto 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-color); /* Matches page background before camera loads */
+    min-height: 250px;
+}
+
+.webcam-box canvas {
+    display: block;
+    border-radius: 12px;
+}
+
+/* Predictions Label Box */
+.labels-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.labels-box div {
+    background: var(--bg-color);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(11, 45, 38, 0.1);
+    color: var(--primary-color);
+}

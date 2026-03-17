@@ -3,35 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Botanix | Updated Header & Footer</title>
+    <title>Botanix | AI Disease Diagnostics</title>
     <link rel="stylesheet" href="style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <header class="navbar">
         <div class="container">
             <div class="logo">
-                <a href="#">
+                <a href="index.html">
                     <img src="image_1.png" alt="Botanix Logo" class="brand-logo">
                 </a>
             </div>
             <nav class="nav-links">
-                <a href="https://yasithbuckeroo2026.wixsite.com/botanix" target="_blank">Home</a>
-                <a href="https://yasithbuckeroo2026.wixsite.com/botanix/portfolio" target="_blank">Portfolio Page</a>
-                
+                <a href="index.html" class="active">Home</a>
+                <a href="portfolio.html">Portfolio Page</a>
             </nav>
         </div>
     </header>
 
     <main class="content-spacer">
-        </main>
+        <div class="container ai-container">
+            <div class="ai-card">
+                <h2 class="ai-title">Botanix AI Diagnostics</h2>
+                <p class="ai-description">Click start and allow camera access to scan plants for diseases.</p>
+                
+                <button type="button" class="btn-primary" onclick="init()">Start Scanner</button>
+                
+                <div id="webcam-container" class="webcam-box"></div>
+                <div id="label-container" class="labels-box"></div>
+            </div>
+        </div>
+    </main>
 
     <footer class="footer">
         <div class="container">
             <div class="footer-top">
                 <div class="footer-left">
-                    <a href="#">
+                    <a href="index.html">
                         <img src="image_1.png" alt="Botanix Logo" class="footer-brand-logo">
                     </a>
                 </div>
@@ -59,5 +72,66 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        // the link to your model provided by Teachable Machine export panel
+        const URL = "./my_model/";
+
+        let model, webcam, labelContainer, maxPredictions;
+
+        // Load the image model and setup the webcam
+        async function init() {
+            // Disable button to prevent multiple clicks
+            document.querySelector(".btn-primary").innerText = "Loading Model...";
+            document.querySelector(".btn-primary").disabled = true;
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Convenience function to setup a webcam
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(250, 250, flip); // Increased size slightly to 250x250
+            await webcam.setup(); // request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // append elements to the DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            
+            // Clear existing labels if clicked again
+            labelContainer.innerHTML = ""; 
+            
+            for (let i = 0; i < maxPredictions; i++) { // and class labels
+                labelContainer.appendChild(document.createElement("div"));
+            }
+
+            // Update button state
+            document.querySelector(".btn-primary").innerText = "Scanner Active";
+            document.querySelector(".btn-primary").style.backgroundColor = "#E1306C"; // Turn red-ish to indicate live
+        }
+
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // run the webcam image through the image model
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                // Formatting to look a bit cleaner
+                const className = prediction[i].className;
+                const probability = (prediction[i].probability * 100).toFixed(0) + "%";
+                const classPrediction = `<span>${className}</span> <strong>${probability}</strong>`;
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+        }
+    </script>
 </body>
 </html>
