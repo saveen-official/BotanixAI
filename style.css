@@ -358,3 +358,19 @@ body {
     padding: 8px;
     background-color: transparent;
 }
+
+.btn-reset-app {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    opacity: 0.4;
+    font-size: 12px;
+    margin-top: 30px;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+}
+
+.btn-reset-app:hover {
+    opacity: 1;
+}
