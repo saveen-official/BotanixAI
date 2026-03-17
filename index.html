@@ -75,64 +75,74 @@
         </div>
     </footer>
 
-    <script> const URL = "./my_model/"; // Or your Cloud Link
-let model, webcam, labelContainer, maxPredictions;
-
-async function init() {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-
-    const flip = true; 
-    webcam = new tmImage.Webcam(250, 250, flip); 
-    await webcam.setup(); 
-    await webcam.play();
-
-    // Start the webcam visual loop so the user sees a "live" camera
-    window.requestAnimationFrame(loop);
-
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     
-    // UI Changes: Hide Start, Show Analyze
-    document.getElementById("start-btn").style.display = "none";
-    document.getElementById("capture-btn").style.display = "block";
-}
+    <script type="text/javascript">
+        const URL = "./my_model/";
+        let model, webcam, labelContainer, maxPredictions;
 
-// This loop ONLY updates the video feed, it doesn't run the AI anymore
-async function loop() {
-    webcam.update(); 
-    window.requestAnimationFrame(loop);
-}
+        async function init() {
+            // UI Feedback: Disable start button
+            const startBtn = document.getElementById("start-btn");
+            startBtn.innerText = "Loading Model...";
+            startBtn.disabled = true;
 
-// This only runs when the "Analyze" button is clicked
-async function predict() {
-    const diagnosisDiv = document.getElementById("diagnosis-result");
-    diagnosisDiv.innerHTML = "Analyzing...";
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
 
-    const prediction = await model.predict(webcam.canvas);
-    
-    // Find the prediction with the highest probability
-    let highestProb = 0;
-    let bestMatch = "";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
 
-    for (let i = 0; i < maxPredictions; i++) {
-        if (prediction[i].probability > highestProb) {
-            highestProb = prediction[i].probability;
-            bestMatch = prediction[i].className;
+            const flip = true; 
+            webcam = new tmImage.Webcam(250, 250, flip); 
+            await webcam.setup(); 
+            await webcam.play();
+            
+            // Start the visual loop (shows the camera feed)
+            window.requestAnimationFrame(loop);
+
+            // Add the camera to the page
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            
+            // UI Changes: Hide Start Button, Show the Analyze Button
+            startBtn.style.display = "none";
+            document.getElementById("capture-btn").style.display = "block";
         }
-    }
 
-    // Display the result beautifully
-    const confidence = (highestProb * 100).toFixed(0);
-    diagnosisDiv.innerHTML = `
-        <div class="diagnosis-card">
-            <h3>Detection: ${bestMatch}</h3>
-            <p>Confidence: ${confidence}%</p>
-        </div>
-    `;
-}
+        async function loop() {
+            webcam.update(); // Only updates the camera view
+            window.requestAnimationFrame(loop);
+            // NOTE: We removed "await predict()" from here!
+        }
+
+        // This function now only runs ONCE when you click the button
+        async function predict() {
+            const resultDiv = document.getElementById("diagnosis-result");
+            resultDiv.innerHTML = "Scanning image...";
+
+            const prediction = await model.predict(webcam.canvas);
+            
+            // Logic to find the result with the highest percentage
+            let highestProb = 0;
+            let bestMatch = "";
+
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].probability > highestProb) {
+                    highestProb = prediction[i].probability;
+                    bestMatch = prediction[i].className;
+                }
+            }
+
+            // Display the final result
+            const confidence = (highestProb * 100).toFixed(0);
+            resultDiv.innerHTML = `
+                <div class="diagnosis-card">
+                    <h3>Result: ${bestMatch}</h3>
+                    <p>Accuracy: ${confidence}%</p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
