@@ -267,3 +267,39 @@ body {
     border: 1px solid rgba(11, 45, 38, 0.1);
     color: var(--primary-color);
 }
+.btn-secondary {
+    background-color: #E1306C; /* A distinct color for the action button */
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.result-display {
+    margin-top: 20px;
+}
+
+.diagnosis-card {
+    background: #f0f7f4;
+    border-left: 5px solid var(--primary-color);
+    padding: 15px;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.diagnosis-card h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.diagnosis-card p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    opacity: 0.7;
+}

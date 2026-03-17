@@ -30,12 +30,15 @@
         <div class="container ai-container">
             <div class="ai-card">
                 <h2 class="ai-title">Botanix AI Diagnostics</h2>
-                <p class="ai-description">Click start and allow camera access to scan plants for diseases.</p>
-                
-                <button type="button" class="btn-primary" onclick="init()">Start Scanner</button>
-                
+                <p class="ai-description">Aim the camera at the plant and click "Analyze" to identify the issue.</p>
+            
+                <button type="button" id="start-btn" class="btn-primary" onclick="init()">Start Camera</button>
+            
                 <div id="webcam-container" class="webcam-box"></div>
-                <div id="label-container" class="labels-box"></div>
+            
+                <button type="button" id="capture-btn" class="btn-secondary" onclick="predict()" style="display:none;">Analyze Image</button>
+            
+                <div id="diagnosis-result" class="result-display"></div>
             </div>
         </div>
     </main>
@@ -72,66 +75,64 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
-        // the link to your model provided by Teachable Machine export panel
-        const URL = "./my_model/";
+    <script> const URL = "./my_model/"; // Or your Cloud Link
+let model, webcam, labelContainer, maxPredictions;
 
-        let model, webcam, labelContainer, maxPredictions;
+async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-        // Load the image model and setup the webcam
-        async function init() {
-            // Disable button to prevent multiple clicks
-            document.querySelector(".btn-primary").innerText = "Loading Model...";
-            document.querySelector(".btn-primary").disabled = true;
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+    const flip = true; 
+    webcam = new tmImage.Webcam(250, 250, flip); 
+    await webcam.setup(); 
+    await webcam.play();
 
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
+    // Start the webcam visual loop so the user sees a "live" camera
+    window.requestAnimationFrame(loop);
 
-            // Convenience function to setup a webcam
-            const flip = true; // whether to flip the webcam
-            webcam = new tmImage.Webcam(250, 250, flip); // Increased size slightly to 250x250
-            await webcam.setup(); // request access to the webcam
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+    document.getElementById("webcam-container").appendChild(webcam.canvas);
+    
+    // UI Changes: Hide Start, Show Analyze
+    document.getElementById("start-btn").style.display = "none";
+    document.getElementById("capture-btn").style.display = "block";
+}
 
-            // append elements to the DOM
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            
-            // Clear existing labels if clicked again
-            labelContainer.innerHTML = ""; 
-            
-            for (let i = 0; i < maxPredictions; i++) { // and class labels
-                labelContainer.appendChild(document.createElement("div"));
-            }
+// This loop ONLY updates the video feed, it doesn't run the AI anymore
+async function loop() {
+    webcam.update(); 
+    window.requestAnimationFrame(loop);
+}
 
-            // Update button state
-            document.querySelector(".btn-primary").innerText = "Scanner Active";
-            document.querySelector(".btn-primary").style.backgroundColor = "#E1306C"; // Turn red-ish to indicate live
+// This only runs when the "Analyze" button is clicked
+async function predict() {
+    const diagnosisDiv = document.getElementById("diagnosis-result");
+    diagnosisDiv.innerHTML = "Analyzing...";
+
+    const prediction = await model.predict(webcam.canvas);
+    
+    // Find the prediction with the highest probability
+    let highestProb = 0;
+    let bestMatch = "";
+
+    for (let i = 0; i < maxPredictions; i++) {
+        if (prediction[i].probability > highestProb) {
+            highestProb = prediction[i].probability;
+            bestMatch = prediction[i].className;
         }
+    }
 
-        async function loop() {
-            webcam.update(); // update the webcam frame
-            await predict();
-            window.requestAnimationFrame(loop);
-        }
-
-        // run the webcam image through the image model
-        async function predict() {
-            const prediction = await model.predict(webcam.canvas);
-            for (let i = 0; i < maxPredictions; i++) {
-                // Formatting to look a bit cleaner
-                const className = prediction[i].className;
-                const probability = (prediction[i].probability * 100).toFixed(0) + "%";
-                const classPrediction = `<span>${className}</span> <strong>${probability}</strong>`;
-                labelContainer.childNodes[i].innerHTML = classPrediction;
-            }
-        }
+    // Display the result beautifully
+    const confidence = (highestProb * 100).toFixed(0);
+    diagnosisDiv.innerHTML = `
+        <div class="diagnosis-card">
+            <h3>Detection: ${bestMatch}</h3>
+            <p>Confidence: ${confidence}%</p>
+        </div>
+    `;
+}
     </script>
 </body>
 </html>
