@@ -86,6 +86,29 @@
 
     <script type="text/javascript">
         const URL = "./my_model/";
+
+        // Dictionary for disease descriptions and recommended actions
+        const diseaseInfo = {
+            "Rice Blast": {
+                description: "A serious fungal disease that causes spindle-shaped spots on leaves.",
+                action: "Apply fungicides like Tricyclazole and avoid excessive nitrogen fertilizer."
+            },
+            "Bacterial Leaf Blight": {
+                description: "Causes yellow to white wavy stripes on leaf blades, eventually drying them out.",
+                action: "Use resistant varieties and ensure proper field drainage."
+            },
+            "Brown Spot": {
+                description: "Characterized by oval, dark brown lesions. Often a sign of nutritional stress.",
+                action: "Improve soil fertility (Potassium) and use clean, treated seeds."
+            },
+            "Papaya Ring Spot": {
+                description: "The plant shows no visible signs of the tracked diseases.",
+                action: "Continue regular monitoring and standard fertilization schedules."
+            },
+
+            // Add all your Teachable Machine categories here!
+        };
+
         let model, webcam, maxPredictions;
         let isStatic = false;
         let animationId; // Crucial for stopping the background loop
