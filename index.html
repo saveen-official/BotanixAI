@@ -187,16 +187,45 @@
             reader.readAsDataURL(file);
         }
 
+        // 1. Define the categories you want to hide (Names must match exactly what is in Teachable Machine)
+        const hiddenClasses = ["HEALTHY Potato", "HEALTHY Coconut", "HEALTHY Carrots", "HEALTHY Rice", "HEALTHY Banana", "HEALTHY Cabbage", "HEALTHY Onion", "People", "HEALTHY Sugarcane", "HEALTHY Pumpkin", "HEALTHY Chilli", "HEALTHY Papaya"]; 
+
         async function runDiagnosis(source) {
             const resultDiv = document.getElementById("diagnosis-result");
             resultDiv.innerHTML = "<p>Analyzing...</p>";
+            
             const prediction = await model.predict(source);
-            let topClass = "", topProb = 0;
+            let topClass = "";
+            let topProb = 0;
+
+            // 2. Loop through the results to find the highest probability
             prediction.forEach(p => {
-                if(p.probability > topProb) { topProb = p.probability; topClass = p.className; }
+                if (p.probability > topProb) {
+                    topProb = p.probability;
+                    topClass = p.className;
+                }
             });
-            resultDiv.innerHTML = `<div class="diagnosis-card"><h3>Result: ${topClass}</h3><p>Accuracy: ${(topProb * 100).toFixed(0)}%</p></div>`;
-        }
+
+            // 3. Check if the top result is in our 'hidden' list
+            if (hiddenClasses.includes(topClass)) {
+                resultDiv.innerHTML = `
+                    <div class="diagnosis-card" style="border-left-color: #888;">
+                        <h3>No Disease Detected</h3>
+                        <p>The plant appears to be healthy or no disease was identified.</p>
+                    </div>
+                `;
+            } else {
+                // 4. Show the result only if it's a 'disease' category
+                const confidence = (topProb * 100).toFixed(0);
+                resultDiv.innerHTML = `
+                    <div class="diagnosis-card">
+                        <h3>Result: ${topClass}</h3>
+                        <p>Confidence Score: ${confidence}%</p>
+                    </div>
+                `;
+            }
+        }        
+        
 
         function resetScanner() {
             isStatic = false;
