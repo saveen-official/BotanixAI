@@ -215,13 +215,13 @@
 
         async function runDiagnosis(source) {
             const resultDiv = document.getElementById("diagnosis-result");
-            resultDiv.innerHTML = "<p>Analyzing...</p>";
+            resultDiv.innerHTML = "<p>Analyzing image...</p>";
             
             const prediction = await model.predict(source);
             let topClass = "";
             let topProb = 0;
 
-            // 2. Loop through the results to find the highest probability
+            // 1. Find the best match
             prediction.forEach(p => {
                 if (p.probability > topProb) {
                     topProb = p.probability;
@@ -229,24 +229,37 @@
                 }
             });
 
-            // 3. Check if the top result is in our 'hidden' list
+            // 2. Check if it's a "Healthy" or "Background" class we want to filter
             if (hiddenClasses.includes(topClass)) {
                 resultDiv.innerHTML = `
                     <div class="diagnosis-card" style="border-left-color: #888;">
                         <h3>No Disease Detected</h3>
-                        <p>The plant appears to be healthy or no disease was identified.</p>
+                        <p>The plant appears to be healthy or no disease was identified in this scan.</p>
                     </div>
                 `;
-            } else {
-                // 4. Show the result only if it's a 'disease' category
-                const confidence = (topProb * 100).toFixed(0);
-                resultDiv.innerHTML = `
-                    <div class="diagnosis-card">
-                        <h3>Result: ${topClass}</h3>
-                        <p>Confidence Score: ${confidence}%</p>
-                    </div>
-                `;
+                return; // Stop here
             }
+
+            // 3. If it IS a disease, get the extra info from our dictionary
+            const info = diseaseInfo[topClass] || { 
+                description: "No detailed information available for this category.", 
+                action: "Please consult a local agricultural expert." 
+            };
+
+            const confidence = (topProb * 100).toFixed(0);
+
+            // 4. Display the full Result Card
+            resultDiv.innerHTML = `
+                <div class="diagnosis-card">
+                    <div class="result-header">
+                        <h3>Result: ${topClass}</h3>
+                        <span class="confidence-badge">${confidence}% Match</span>
+                    </div>
+                    <hr>
+                    <p class="disease-desc"><strong>Description:</strong> ${info.description}</p>
+                    <p class="disease-action"><strong>Recommended Action:</strong> ${info.action}</p>
+                </div>
+            `;
         }        
         
 
