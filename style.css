@@ -416,3 +416,74 @@ body {
 .disease-action strong {
     color: #0B2D26;
 }
+
+/* Layout Wrapper */
+.ai-dashboard {
+    display: flex;
+    gap: 40px;
+    padding: 60px 20px;
+    align-items: flex-start;
+}
+
+.scanner-section {
+    flex: 1; /* Takes 1 part of the space */
+    max-width: 450px;
+}
+
+.info-section {
+    flex: 1.5; /* Takes 1.5 parts - makes it wider for text */
+}
+
+/* Side Panel Styling */
+.side-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 40px;
+    min-height: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border-top: 6px solid var(--primary-color);
+}
+
+.side-panel h2 {
+    font-size: 32px; /* Bigger Title */
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.confidence-large {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.detailed-desc {
+    font-size: 18px; /* Clearer, bigger text */
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 30px;
+}
+
+.action-box {
+    background: #f9fbf9;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px dashed var(--primary-color);
+}
+
+.placeholder-msg {
+    text-align: center;
+    padding-top: 100px;
+    opacity: 0.3;
+}
+
+.placeholder-msg i { font-size: 50px; margin-bottom: 20px; }
+
+/* Responsive: Stack columns on mobile */
+@media (max-width: 900px) {
+    .ai-dashboard { flex-direction: column; align-items: center; }
+    .info-section, .scanner-section { width: 100%; max-width: 500px; }
+}

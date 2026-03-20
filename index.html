@@ -23,42 +23,46 @@
     </header>
 
     <main class="content-spacer">
-        <div class="container ai-container">
-            <div class="ai-card">
-                <h2 class="ai-title">Botanix AI Diagnostics</h2>
-                <p class="ai-description">Scan a plant via camera or upload a photo for instant disease detection.</p>
-                
-                <div id="initial-controls">
-                    <button type="button" id="start-btn" class="btn-primary" onclick="init()">
-                        <i class="fas fa-camera"></i> Start Live Camera
-                    </button>
-                    <div class="divider"><span>OR</span></div>
-                    <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
-                    <button type="button" class="btn-upload" onclick="document.getElementById('file-upload').click()">
-                        <i class="fas fa-file-upload"></i> Upload Photo
-                    </button>
+        <div class="container ai-dashboard">
+            
+            <div class="scanner-section">
+                <div class="ai-card">
+                    <h2 class="ai-title">Botanix Scanner</h2>
+                    
+                    <div id="initial-controls">
+                        <button type="button" id="start-btn" class="btn-primary" onclick="init()">
+                            <i class="fas fa-camera"></i> Open Camera
+                        </button>
+                        <div class="divider"><span>OR</span></div>
+                        <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+                        <button type="button" class="btn-upload" onclick="document.getElementById('file-upload').click()">
+                            <i class="fas fa-file-upload"></i> Upload Photo
+                        </button>
+                    </div>
+
+                    <div id="webcam-container" class="webcam-box" style="display:none;"></div>
+                    <div id="capture-container" class="webcam-box" style="display:none;">
+                        <canvas id="captured-photo"></canvas>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
+                        <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">New Scan</button>
+                    </div>
                 </div>
-                
-                <div id="webcam-container" class="webcam-box" style="display:none;"></div>
-
-                <div id="capture-container" class="webcam-box" style="display:none;">
-                    <canvas id="captured-photo"></canvas>
-                </div>
-
-                <div class="button-group">
-                    <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
-                    <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">New Scan</button>
-                </div>
-
-                <div id="diagnosis-result"></div>
-
-                <button type="button" class="btn-reset-app" onclick="hardReset()">
-                    <i class="fas fa-sync-alt"></i> Reset App State
-                </button>
             </div>
+
+            <div class="info-section">
+                <div id="diagnosis-result" class="side-panel">
+                    <div class="placeholder-msg">
+                        <i class="fas fa-microscope"></i>
+                        <p>Waiting for scan... <br>Analysis details will appear here.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
-
     <footer class="footer">
         <div class="container">
             <div class="footer-top">
@@ -221,7 +225,6 @@
             let topClass = "";
             let topProb = 0;
 
-            // 1. Find the best match
             prediction.forEach(p => {
                 if (p.probability > topProb) {
                     topProb = p.probability;
@@ -229,38 +232,33 @@
                 }
             });
 
-            // 2. Check if it's a "Healthy" or "Background" class we want to filter
             if (hiddenClasses.includes(topClass)) {
                 resultDiv.innerHTML = `
-                    <div class="diagnosis-card" style="border-left-color: #888;">
-                        <h3>No Disease Detected</h3>
-                        <p>The plant appears to be healthy or no disease was identified in this scan.</p>
-                    </div>
+                    <h2>Healthy Plant</h2>
+                    <div class="confidence-large">100% Normal</div>
+                    <p class="detailed-desc">Our AI has analyzed the sample and found no significant traces of disease. This category typically includes healthy leaves or non-target backgrounds.</p>
                 `;
-                return; // Stop here
+                return;
             }
 
-            // 3. If it IS a disease, get the extra info from our dictionary
-            const info = diseaseInfo[topClass] || { 
-                description: "No detailed information available for this category.", 
-                action: "Please consult a local agricultural expert." 
-            };
-
+            const info = diseaseInfo[topClass] || { description: "Information pending...", action: "Consult expert." };
             const confidence = (topProb * 100).toFixed(0);
 
-            // 4. Display the full Result Card
             resultDiv.innerHTML = `
-                <div class="diagnosis-card">
-                    <div class="result-header">
-                        <h3>Result: ${topClass}</h3>
-                        <span class="confidence-badge">${confidence}% Match</span>
-                    </div>
-                    <hr>
-                    <p class="disease-desc"><strong>Description:</strong> ${info.description}</p>
-                    <p class="disease-action"><strong>Recommended Action:</strong> ${info.action}</p>
+                <h2>${topClass} Detected</h2>
+                <div class="confidence-large">${confidence}% AI Match Confidence</div>
+                
+                <p class="detailed-desc">
+                    <strong>About this condition:</strong><br>
+                    ${info.description}
+                </p>
+
+                <div class="action-box">
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">Recommended Action Plan:</h4>
+                    <p style="font-size: 16px; line-height: 1.6;">${info.action}</p>
                 </div>
             `;
-        }        
+        }      
         
 
         function resetScanner() {
