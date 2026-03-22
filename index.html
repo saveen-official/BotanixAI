@@ -49,6 +49,12 @@
                         <button type="button" id="capture-btn" class="btn-secondary" onclick="captureAndPredict()" style="display:none;">Analyze Plant</button>
                         <button type="button" id="retake-btn" class="btn-primary" onclick="resetScanner()" style="display:none;">New Scan</button>
                     </div>
+
+                    <div class="reset-wrapper" style="margin-top: 25px; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 15px;">
+                        <button type="button" class="btn-hard-reset" onclick="hardReset()">
+                            <i class="fas fa-sync-alt"></i> Reset Application
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -277,8 +283,36 @@
                     <li>Field sanitation - Removing infected plant material after harvest eliminates fungal spores’ winter hideouts.</li><br>
                     <li>Crop rotation - Alternating between anthracnose hosts and non-hosts is a smart way to interrupt the transmission of disease. Using EOSDA Crop Monitoring’s Crop rotation feature, you can easily plan and track your rotation schedules for optimal field usage with minimal disease pressure.</li>
                 </ul>`
-                
+            },
 
+            "Early  Blight": {
+                description: `<div style="text-align: right;"><a href="https://agritech.tnau.ac.in/crop_protection/crop_prot_crop%20diseases_veg_potato_2.html">TNAU Agritech Portal</a></div>
+                <b>Symptoms</b><br><br>
+                <ul>
+                    <li>It is present in both hills & plains.</li>
+                    <li>Brown-black necrotic spot-angular, oval shape characterized by concentric rings.</li>
+                    <li>Several spot coalesce & spread all over the leaf.</li>
+                    <li>Shot holes on fruits.</li>
+                </ul><br>`,
+
+                action: `<ul>
+                    <li>Disease free seed tubers should be used for planting.</li>
+                    <li>Removal and destruction of infected plant debris should be done because the spores lying in the soil are the primary source of infection.</li>
+                    <li>Very early spraying with Zineb or captan 0.2% and repeating it for every 15 – 20 days gives effective control.</li>
+                    <li>The variety Kufri Sindhuri possesses a fair degree of resistance.</li>
+                </ul>`
+            },
+
+            "Late  Blight": {
+                description: `<div style="text-align: right;"><a href="https://agritech.tnau.ac.in/crop_protection/crop_prot_crop%20diseases_veg_potato_2.html">TNAU Agritech Portal</a></div>
+                <b>Symptoms</b><br><br>
+                <ul>
+                    <li>The disease develops from infected seed or in some instances, direct germination from the resting oospores in the soil (more common in cooler regions). </li>
+                    <li>The fungal spores and developing lesions are carried from the tuber and will show initially as stem lesions, producing spores at the base of the developing canopy, which can also spread to nearby plants.</li>
+                </ul><br>`,
+
+                action: `<ul>
+                    <li>`
             }
 
             // Add all your Teachable Machine categories here!
@@ -456,7 +490,12 @@
             document.getElementById("capture-container").style.display = "none";
             document.getElementById("capture-btn").style.display = "none";
             document.getElementById("retake-btn").style.display = "none";
-            document.getElementById("diagnosis-result").innerHTML = "";
+            document.getElementById("diagnosis-result").innerHTML = `
+                <div class="placeholder-msg">
+                    <i class="fas fa-microscope"></i>
+                    <p>Waiting for scan... <br>Analysis details will appear here.</p>
+                </div>
+            `;
             document.getElementById("start-btn").innerText = "Start Live Camera";
             document.getElementById("start-btn").disabled = false;
         }
