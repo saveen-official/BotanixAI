@@ -533,3 +533,16 @@ ul {
 ul {
     margin-top: -5px; 
 }
+
+/* Forces nested lists in the action box to indent */
+.action-box ul ul {
+    margin-left: 25px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    list-style-type: circle; /* Ensures the hollow bullet point */
+}
+
+/* Optional: Adds a bit of spacing between the main bullet points so it's easier to read */
+.action-box > ul > li {
+    margin-bottom: 12px;
+}
