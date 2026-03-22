@@ -359,16 +359,50 @@ body {
     background-color: transparent;
 }
 
-.btn-reset-app {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    opacity: 0.4;
-    font-size: 12px;
-    margin-top: 30px;
+.btn-hard-reset {
+    /* --- Base Styling --- */
+    background-color: #fce4ec; /* Very light pink/red background */
+    color: #c2185b; /* Darker red-ish text color */
+    border: 1px solid #f8bbd0; /* Subtle border that matches */
+    border-radius: 8px; /* Smooth, rounded corners */
+    padding: 10px 20px; /* Comfortable padding for a good clickable area */
+    
+    /* --- Typography & Alignment --- */
+    font-size: 14px;
+    font-weight: 600; /* Medium-bold font for clarity */
     cursor: pointer;
-    text-decoration: underline;
-    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between the icon and text */
+    margin: 0 auto; /* Keep it centered */
+    
+    /* --- Modern Transitions --- */
+    transition: all 0.3s ease; /* Smooth fade/move effect on hover */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Very subtle shadow for depth */
+}
+
+/* --- Professional Hover & Active States --- */
+.btn-hard-reset:hover {
+    background-color: #c2185b; /* Darker background on hover */
+    color: #ffffff; /* White text on hover */
+    border-color: #c2185b; /* Match border to background */
+    box-shadow: 0 4px 10px rgba(194, 24, 91, 0.2); /* Soft red shadow on hover */
+}
+
+.btn-hard-reset:active {
+    transform: translateY(1px); /* Little "click" effect */
+    box-shadow: 0 2px 4px rgba(194, 24, 91, 0.1); /* Reduce shadow when clicked */
+}
+
+/* --- Minor Icon Adjustment --- */
+.btn-hard-reset i {
+    font-size: 13px;
+    transition: transform 0.4s ease; /* Icon rotation animation */
+}
+
+.btn-hard-reset:hover i {
+    transform: rotate(180deg); /* Icon spins on hover! */
 }
 
 .btn-reset-app:hover {
