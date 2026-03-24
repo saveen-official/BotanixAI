@@ -680,9 +680,9 @@
 
             if (hiddenClasses.includes(topClass)) {
                 resultDiv.innerHTML = `
-                    <h2>Healthy Plant</h2>
+                    <h2>No Disease Detected !</h2>
                     <div class="confidence-large">100% Normal</div>
-                    <p class="detailed-desc">Our AI has analyzed the sample and found no significant traces of disease. This category typically includes healthy leaves or non-target backgrounds.</p>
+                    <p class="detailed-desc">Our AI has analyzed the sample and found no significant traces of disease. <br> Please contact the Botanix team if you are having issues with the AI Model</p>
                 `;
                 return;
             }
