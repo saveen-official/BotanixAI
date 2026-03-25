@@ -580,16 +580,20 @@
                 
                 if (webcam) { await webcam.stop(); }
 
-                webcam = new tmImage.Webcam(250, 250, false);
+                // --- NEW BULLETPROOF CAMERA LOGIC ---
                 try {
-                    // Plan A: Try to force the back camera (for when judges test on their phones)
+                    // Plan A: Try to force the rear camera (for mobile testing)
+                    webcam = new tmImage.Webcam(250, 250, false); 
                     await webcam.setup({ facingMode: "environment" });
-                } catch (err) {
-                    // Plan B: If no back camera exists (like on your Ubuntu laptop), just use the default webcam!
-                    console.log("No back camera found. Falling back to default webcam.");
-                    await webcam.setup(); 
+                    await webcam.play();
+                } catch (cameraErr) {
+                    console.warn("Rear camera not found. Trying laptop webcam...");
+                    // Plan B: Create a BRAND NEW webcam object for the default laptop camera
+                    webcam = new tmImage.Webcam(250, 250, true); 
+                    await webcam.setup();
+                    await webcam.play();
                 }
-                await webcam.play();
+                // ------------------------------------
                 
                 isStatic = false;
                 // Capture the ID so we can kill it when capturing/resetting
